@@ -1,0 +1,58 @@
+env:
+  - GO111MODULE=on
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    ldflags:
+      - '-s -w'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.Version={{.Version}}'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.Commit={{.FullCommit}}'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.RepoUrl={{.GitURL}}'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuildDate={{.Date}}'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuiltWithGoVersion={{.Env.GOLANG_VERSION}}'
+      - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuiltBy={{.Env.BUILT_BY}}'
+    goos:
+      - windows
+      - darwin
+      - linux
+      - freebsd
+    goarch:
+      - 386
+      - amd64
+      - arm
+      - arm64
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+    gomips:
+      - hardfloat
+      - softfloat
+#     hooks:
+#       post:
+#         - bash -c 'upx "{{ .Path }}" || true'
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}'
+    format: tar.gz
+    files:
+      - none*
+    format_overrides:
+      - goos: windows
+        format: zip
+    wrap_in_directory: false
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+      openbsd: OpenBSD
+      netbsd: NetBSD
+      freebsd: FreeBSD
+release:
+  draft: true
+  prerelease: auto
+  name_template: '{{.ProjectName}}-v{{.Version}}-{{.Date}}'

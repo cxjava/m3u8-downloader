@@ -1,0 +1,47 @@
+name: Build & Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        go: [1.17.x]
+        os: [ubuntu-latest]
+    name: Go ${{ matrix.go }} in ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go }}
+    - name: Environment
+      run: |
+        go version
+        go env
+    - name: Cache go module
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: ${{ runner.os }}-go-
+    - name: Install tools
+      env:
+        GO111MODULE: on
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+        golangci-lint --version
+    - name: Lint
+      run: |
+        go mod tidy
+        golangci-lint run ./... -v
+    - name: Test
+      env:
+        GOFLAGS: -mod=mod
+      run: go test -race -coverpkg=./... -coverprofile=coverage.txt ./...
