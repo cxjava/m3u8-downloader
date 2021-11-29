@@ -62,7 +62,7 @@ type Options struct {
 func SetOptions(opt Options) {
 	downloadUrl = opt.DownloadUrl
 	output = opt.Output
-	downloadDir = opt.DownloadDir
+	downloadDir = ResolveDir(opt.DownloadDir)
 	proxy = opt.Proxy
 	deleteSyncByte = opt.DeleteSyncByte
 	deleteTS = opt.DeleteTS
@@ -72,6 +72,24 @@ func SetOptions(opt Options) {
 	baseUrl = opt.BaseUrl
 	keyStr = opt.Key
 	keyFormat = opt.KeyFormat
+}
+
+func ResolveDir(dirStr string) string {
+	abs := filepath.IsAbs(dirStr)
+	if abs {
+		log.Trace("Resolve download directory:" + dirStr)
+		return dirStr
+	}
+	pwd, _ := os.Getwd()
+	dir, err := filepath.Abs(filepath.Join(pwd, dirStr))
+
+	if err != nil {
+		log.Error("Resolve download directory failed")
+		return dirStr
+	}
+
+	log.Trace("Resolve download directory:" + dir)
+	return dir
 }
 
 func Download() {
@@ -112,14 +130,17 @@ func Download() {
 }
 
 func renameFile() {
-	path1 := filepath.Join(outputPath, "/", "merged.tmp")
-	path2 := filepath.Join(downloadDir, "/", output)
+	path1 := filepath.Join(outputPath, "merged.tmp")
+	path2 := filepath.Join(downloadDir, output)
 	err := os.Rename(path1, path2)
 	if err != nil {
 		log.Println("[error] Rename failed: " + err.Error())
 	}
 	if deleteTS {
-		os.RemoveAll(outputPath)
+		err = os.RemoveAll(outputPath)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -134,10 +155,11 @@ func mergeFile() {
 
 func checkOutputFolder() {
 	log.Trace("Check output folder")
-	pwd, _ := os.Getwd()
-	downloadDir, _ = filepath.Abs(filepath.Join(pwd, "/", downloadDir))
-	log.Trace("Download dir is : " + downloadDir)
-	outputPath, _ = filepath.Abs(filepath.Join(downloadDir, "/", output+"_downloading"))
+	if len(downloadDir) == 0 {
+		return
+	}
+
+	outputPath = filepath.Join(downloadDir, output+"_downloading")
 	log.Trace("Output path is : " + outputPath)
 	utils.MkAllDir(outputPath)
 }
