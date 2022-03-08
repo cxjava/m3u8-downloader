@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -130,7 +129,7 @@ func Download() {
 }
 
 func renameFile() {
-	path1 := filepath.Join(outputPath, "merged.tmp")
+	path1 := filepath.Join(outputPath, "merged.mp4")
 	path2 := filepath.Join(downloadDir, output)
 	err := os.Rename(path1, path2)
 	if err != nil {
@@ -145,12 +144,7 @@ func renameFile() {
 }
 
 func mergeFile() {
-	switch runtime.GOOS {
-	case "windows":
-		utils.WinMergeFile(outputPath, deleteTS)
-	default:
-		utils.UnixMergeFile(outputPath, deleteTS)
-	}
+	utils.FFmpegMergeFile(outputPath, deleteTS)
 }
 
 func checkOutputFolder() {
