@@ -124,12 +124,12 @@ func Download() {
 	}
 
 	downloadM3u8(mpl)
-	mergeFile()
-	renameFile()
+	temp_name := mergeFile()
+	renameFile(temp_name)
 }
 
-func renameFile() {
-	path1 := filepath.Join(outputPath, "merged.mp4")
+func renameFile(temp_file string) {
+	path1 := filepath.Join(outputPath, temp_file)
 	path2 := filepath.Join(downloadDir, output)
 	err := os.Rename(path1, path2)
 	if err != nil {
@@ -143,8 +143,8 @@ func renameFile() {
 	}
 }
 
-func mergeFile() {
-	utils.FFmpegMergeFile(outputPath, deleteTS)
+func mergeFile() string {
+	return utils.FFmpegMergeFile(outputPath, deleteTS)
 }
 
 func checkOutputFolder() {
