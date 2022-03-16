@@ -36,16 +36,10 @@ jobs:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: ${{ runner.os }}-go-
-    - name: Install tools
-      env:
-        GO111MODULE: on
-      run: |
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-        golangci-lint --version
-    - name: Lint
-      run: |
-        go mod tidy
-        golangci-lint run ./... -v
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
     - name: Test
       env:
         GOFLAGS: -mod=mod
