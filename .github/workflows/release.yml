@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        go: [1.17.x]
+        go: [1.18.x]
         os: [ubuntu-latest]
     name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
