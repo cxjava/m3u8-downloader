@@ -2,11 +2,16 @@ name: Build & Test
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch:
+    inputs:
+      upx_version:
+        description: 'UPX version'
+        required: true
+        default: '3.96'
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
