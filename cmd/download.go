@@ -24,6 +24,7 @@ var (
 	logLevel       string
 	key            string
 	keyFormat      string
+	useFFmpeg      bool
 )
 
 // downloadCmd represents the download command
@@ -53,6 +54,7 @@ var downloadCmd = &cobra.Command{
 			CDNs:           cdns,
 			Key:            key,
 			KeyFormat:      keyFormat,
+			UseFFmpeg:      useFFmpeg,
 		}
 		downloader.SetOptions(options)
 		downloader.Download()
@@ -74,6 +76,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&logLevel, "logLevel", "l", "Info", "logging level on a Logger,logging levels: Trace, Debug, Info, Warning, Error, Fatal and Panic.")
 	downloadCmd.Flags().StringVarP(&key, "key", "", "", "custom key to decrypt ts data.")
 	downloadCmd.Flags().StringVarP(&keyFormat, "keyFormat", "", "original", "format of key, format can be those values: original, hex, base64.")
+	downloadCmd.Flags().BoolVarP(&useFFmpeg, "UseFFmpeg", "", false, "use FFmpeg for merging TS files.")
 
 	// Here you will define your flags and configuration settings.
 

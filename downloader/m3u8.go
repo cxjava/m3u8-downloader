@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -39,6 +40,7 @@ var (
 	baseUrl        string
 	keyStr         string
 	keyFormat      string
+	useFFmpeg      bool
 )
 
 // Options defines common m3u8 options.
@@ -55,6 +57,7 @@ type Options struct {
 	BaseUrl        string
 	Key            string
 	KeyFormat      string
+	UseFFmpeg      bool
 }
 
 // SetOptions sets the common request option.
@@ -71,6 +74,7 @@ func SetOptions(opt Options) {
 	baseUrl = opt.BaseUrl
 	keyStr = opt.Key
 	keyFormat = opt.KeyFormat
+	useFFmpeg = opt.UseFFmpeg
 }
 
 func ResolveDir(dirStr string) string {
@@ -144,6 +148,14 @@ func renameFile(temp_file string) {
 }
 
 func mergeFile() string {
+	if !useFFmpeg {
+		switch runtime.GOOS {
+		case "windows":
+			return utils.WinMergeFile(outputPath, deleteTS)
+		default:
+			return utils.UnixMergeFile(outputPath, deleteTS)
+		}
+	}
 	return utils.FFmpegMergeFile(outputPath, deleteTS)
 }
 
