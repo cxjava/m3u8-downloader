@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/cxjava/m3u8-downloader/downloader"
-	"github.com/golang-module/carbon"
+	"github.com/golang-module/carbon/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +38,7 @@ var downloadCmd = &cobra.Command{
 		initLog()
 		downloadUrl = args[0]
 		if len(output) == 0 {
-			output = fmt.Sprintf("%d.ts", carbon.Now().TimestampWithMillisecond())
+			output = fmt.Sprintf("%d.ts", carbon.Now().TimestampMilli())
 		}
 		log.Info("output file name is :", output)
 		options := downloader.Options{
