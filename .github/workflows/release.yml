@@ -29,10 +29,10 @@ jobs:
         run: |
           go version
           go env
-      # - name: Run golangci-lint
-      #   uses: golangci/golangci-lint-action@v3
-      #   with:
-      #     version: latest
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
       - name: Test
         env:
           GOFLAGS: -mod=mod
