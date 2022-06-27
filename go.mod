@@ -9,7 +9,7 @@ require (
 	github.com/golang-module/carbon/v2 v2.1.8
 	github.com/grafov/m3u8 v0.11.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 )
 
