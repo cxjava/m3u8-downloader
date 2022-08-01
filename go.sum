@@ -74,8 +74,8 @@ github.com/go-ping/ping v0.0.0-20211130115550-779d1e919534 h1:dhy9OQKGBh4zVXbjwb
 github.com/go-ping/ping v0.0.0-20211130115550-779d1e919534/go.mod h1:xIFjORFzTxqIV/tDVGO4eDy/bLuSyawEeojSm3GfRGk=
 github.com/go-resty/resty/v2 v2.7.0 h1:me+K9p3uhSmXtrBZ4k9jcEAfJmuC8IivWHwaLZwPrFY=
 github.com/go-resty/resty/v2 v2.7.0/go.mod h1:9PWDzw47qPphMRFfhsyk0NnSgvluHcljSMVIq3w7q0I=
-github.com/golang-module/carbon/v2 v2.1.8 h1:pBBmSuLjeXZPzRwGqmZE97wyg6EnEqkFFEq6tlmGwHA=
-github.com/golang-module/carbon/v2 v2.1.8/go.mod h1:NF5unWf838+pyRY0o+qZdIwBMkFf7w0hmLIguLiEpzU=
+github.com/golang-module/carbon/v2 v2.1.9 h1:OWkhYzTTPe+jPOUEL2JkvGwf6bKNQJoh4LVT1LUay80=
+github.com/golang-module/carbon/v2 v2.1.9/go.mod h1:NF5unWf838+pyRY0o+qZdIwBMkFf7w0hmLIguLiEpzU=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
