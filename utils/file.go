@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -38,7 +37,7 @@ func IsExist(filePath string) bool {
 }
 
 func WriteFile(fileName string, data []byte) {
-	err := ioutil.WriteFile(fileName, data, os.ModePerm)
+	err := os.WriteFile(fileName, data, os.ModePerm)
 	check(err)
 }
 

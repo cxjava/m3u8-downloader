@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -109,7 +108,7 @@ func Download() {
 		}
 	} else {
 		// read from file
-		data, err = ioutil.ReadFile(downloadUrl)
+		data, err = os.ReadFile(downloadUrl)
 		if err != nil {
 			log.Error("Read m3u8 file failed:" + downloadUrl + ",Error:" + err.Error())
 			return
@@ -346,7 +345,7 @@ func downloadM3u8(mpl *m3u8.MediaPlaylist) {
 				}
 			}
 
-			err = ioutil.WriteFile(curr_path, originalData, 0666)
+			err = os.WriteFile(curr_path, originalData, 0666)
 			if err != nil {
 				log.Error("WriteFile failed:" + err.Error())
 			}
