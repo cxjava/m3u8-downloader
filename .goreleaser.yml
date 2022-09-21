@@ -16,19 +16,19 @@ builds:
       - windows
       - darwin
       - linux
-      - freebsd
+#       - freebsd
     goarch:
       - 386
       - amd64
       - arm
       - arm64
-      - mips
-      - mipsle
-      - mips64
-      - mips64le
-    gomips:
-      - hardfloat
-      - softfloat
+#       - mips
+#       - mipsle
+#       - mips64
+#       - mips64le
+#     gomips:
+#       - hardfloat
+#       - softfloat
 #     hooks:
 #       post:
 #         - bash -c 'upx "{{ .Path }}" || true'
