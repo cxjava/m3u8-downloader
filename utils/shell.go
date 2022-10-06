@@ -97,7 +97,7 @@ func FFmpegMergeFile(path string, del bool) string {
 			check(err)
 		}
 	default:
-		err = ExecWinShell("ffmpeg -L")
+		err = ExecUnixShell("ffmpeg -L")
 		if err != nil {
 			// fallback to copy
 			log.Warn("Check ffmpeg failed, fallback to merge by copy")

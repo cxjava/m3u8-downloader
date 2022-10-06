@@ -129,6 +129,9 @@ func Download() {
 	downloadM3u8(mpl)
 	temp_name := mergeFile()
 	renameFile(temp_name)
+
+	log.Println("Merge successfully")
+
 }
 
 func renameFile(temp_file string) {
