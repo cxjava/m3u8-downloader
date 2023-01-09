@@ -6,7 +6,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.1.0
 	github.com/go-ping/ping v1.1.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/golang-module/carbon/v2 v2.1.9
+	github.com/golang-module/carbon/v2 v2.2.3
 	github.com/grafov/m3u8 v0.11.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
