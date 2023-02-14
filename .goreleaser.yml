@@ -1,46 +1,48 @@
-env:
-  - GO111MODULE=on
-
+before:
+  hooks:
+    - go mod tidy
 builds:
   - env:
       - CGO_ENABLED=0
     ldflags:
-      - '-s -w'
+      - "-s -w"
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.Version={{.Version}}'
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.Commit={{.FullCommit}}'
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.RepoUrl={{.GitURL}}'
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuildDate={{.Date}}'
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuiltWithGoVersion={{.Env.GOLANG_VERSION}}'
       - -X 'github.com/{{.Env.GITHUB_REPOSITORY}}/cmd.BuiltBy={{.Env.BUILT_BY}}'
-    goos:
-      - windows
-      - darwin
-      - linux
-#       - freebsd
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-#       - mips
-#       - mipsle
-#       - mips64
-#       - mips64le
-#     gomips:
-#       - hardfloat
-#       - softfloat
-#     hooks:
-#       post:
-#         - bash -c 'upx "{{ .Path }}" || true'
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_386
+      - linux_amd64
+      - linux_amd64_v3
+      - linux_arm_5
+      - linux_arm_6
+      - linux_arm_7
+      - linux_arm64
+      # - linux_mips_softfloat
+      # - linux_mips_hardfloat
+      # - linux_mipsle_softfloat
+      # - linux_mipsle_hardfloat
+      # - linux_mips64
+      # - linux_mips64le
+      # - linux_s390x
+      # - linux_riscv64
+      # - freebsd_386
+      # - freebsd_amd64
+      - windows_386
+      - windows_amd64
+      - windows_amd64_v3
+      - windows_arm64
+
 archives:
-  - name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}'
+  - wrap_in_directory: false
     format: tar.gz
-    files:
-      - none*
     format_overrides:
       - goos: windows
         format: zip
-    wrap_in_directory: false
     replacements:
       amd64: 64-bit
       386: 32-bit
@@ -52,7 +54,9 @@ archives:
       openbsd: OpenBSD
       netbsd: NetBSD
       freebsd: FreeBSD
+checksum:
+  name_template: "checksums.txt"
 release:
   draft: true
   prerelease: auto
-  name_template: '{{.ProjectName}}-v{{.Version}}-{{.Date}}'
+  name_template: "{{.ProjectName}}-v{{.Version}}-{{.Date}}"

@@ -1,81 +1,44 @@
-name: Release
+name: GoReleaser
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
-    # inputs:
-    #   upx_version:
-    #     description: 'UPX version'
-    #     required: true
-    #     default: '3.96'
+    inputs:
+      bump_type:
+        description: 'Bump tag type: major, minor, patch. default: minor'
+        required: true
+        default: 'minor'
+
+permissions: write-all
 
 jobs:
-  release:
-    runs-on: ${{ matrix.os }}
+  goreleaser:
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      matrix:
-        go: [1.19.x]
-        os: [ubuntu-latest]
-    name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go }}
-      - name: Environment
-        run: |
-          go version
-          go env
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-      - name: Test
+          go-version: "1.20"
+      - name: Bump tag version
+        id: bumpTag
+        uses: anothrNick/github-tag-action@1.61.0
         env:
-          GOFLAGS: -mod=mod
-        run: go test -race -coverpkg=./... -coverprofile=coverage.txt ./...
-
-      # So GoReleaser can generate the changelog properly
-      - name: Unshallowify the repo clone
-        run: git fetch --prune --unshallow
-        
-      - name: Check git tag exist
-        run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          gitTagExists=$(git tag --points-at HEAD)
-          if ! [ -n "$gitTagExists" ]; then
-              echo "no tag, create one."
-              latesttag=$(git describe --tags `git rev-list --tags --max-count=1`)
-              echo "latest tag: ${latesttag}"
-              newtag=$(echo ${latesttag} | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
-              echo "new tag: ${newtag}"
-              git tag $newtag
-          fi
-      
-#       - name: Installing upx
-#         env:
-#           UPX_VERSION: ${{ github.event.inputs.upx_version }}
-#         run: |
-#           echo "Installing upx .."
-#           curl -OL "https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz"
-#           tar xvf "upx-${UPX_VERSION}-amd64_linux.tar.xz"
-#           cp "upx-${UPX_VERSION}-amd64_linux/upx" "$(go env GOPATH)/bin"
-#           upx --version
-          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DRY_RUN: true
+          DEFAULT_BUMP: "${{ github.event.inputs.bump_type }}" 
+      - name: Bump tag locally
+        run: git tag ${{ steps.bumpTag.outputs.new_tag }}
       - name: Set environment variables
         run: |
           echo "GOLANG_VERSION=$(go version)" >> $GITHUB_ENV
           echo "BUILT_BY=$(whoami)@$(hostname)" >> $GITHUB_ENV
-          
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+      - uses: goreleaser/goreleaser-action@v4
         with:
+          distribution: goreleaser
           version: latest
-          args: release --rm-dist --skip-validate --skip-sign --debug
+          args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOLANG_VERSION: ${{ env.GOLANG_VERSION }}
           BUILT_BY: ${{ env.BUILT_BY }}
