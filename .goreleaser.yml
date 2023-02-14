@@ -43,17 +43,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      arm: ARM
-      arm64: ARM64
-      darwin: macOS
-      linux: Linux
-      windows: Windows
-      openbsd: OpenBSD
-      netbsd: NetBSD
-      freebsd: FreeBSD
 checksum:
   name_template: "checksums.txt"
 release:

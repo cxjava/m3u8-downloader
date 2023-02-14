@@ -1,4 +1,5 @@
 name: Build & Test
+
 on:
   push:
     branches:
@@ -7,35 +8,16 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      upx_version:
-        description: 'UPX version'
-        required: true
-        default: '3.96'
+
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      matrix:
-        go: [1.18.x]
-        os: [ubuntu-latest]
-    name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: ${{ matrix.go }}
-    - name: Environment
-      run: |
-        go version
-        go env
-    - name: Cache go module
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: ${{ runner.os }}-go-
+        go-version: "1.20"
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
