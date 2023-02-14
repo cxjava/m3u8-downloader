@@ -62,6 +62,24 @@ execute() {
 }
 get_binaries() {
   case "$PLATFORM" in
+  darwin/amd64) BINARIES="m3u8-downloader" ;;
+  darwin/arm64) BINARIES="m3u8-downloader" ;;
+  freebsd/386) BINARIES="m3u8-downloader" ;;
+  freebsd/amd64) BINARIES="m3u8-downloader" ;;
+  freebsd/arm64) BINARIES="m3u8-downloader" ;;
+  linux/386) BINARIES="m3u8-downloader" ;;
+  linux/amd64) BINARIES="m3u8-downloader" ;;
+  linux/arm64) BINARIES="m3u8-downloader" ;;
+  linux/armv5) BINARIES="m3u8-downloader" ;;
+  linux/armv6) BINARIES="m3u8-downloader" ;;
+  linux/armv7) BINARIES="m3u8-downloader" ;;
+  linux/mips) BINARIES="m3u8-downloader" ;;
+  linux/mips64) BINARIES="m3u8-downloader" ;;
+  linux/mips64le) BINARIES="m3u8-downloader" ;;
+  linux/mipsle) BINARIES="m3u8-downloader" ;;
+  windows/386) BINARIES="m3u8-downloader" ;;
+  windows/amd64) BINARIES="m3u8-downloader" ;;
+  windows/arm64) BINARIES="m3u8-downloader" ;;
   *)
     log_crit "platform $PLATFORM is not supported. Make sure this script is up-to-date and file request at https://github.com/${PREFIX}/issues/new"
     exit 1
@@ -362,7 +380,7 @@ adjust_arch
 
 log_info "found version: ${VERSION} for ${TAG}/${OS}/${ARCH}"
 
-NAME=${PROJECT_NAME}_${VERSION}_${OS}_${ARCH}<no value>
+NAME=${PROJECT_NAME}_${VERSION}_${OS}_${ARCH}
 TARBALL=${NAME}.${FORMAT}
 TARBALL_URL=${GITHUB_DOWNLOAD}/${TAG}/${TARBALL}
 CHECKSUM=checksums.txt
