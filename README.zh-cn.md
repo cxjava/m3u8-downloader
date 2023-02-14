@@ -39,7 +39,7 @@ Golang版本的M3U8下载器
 `-b`参数指定安装目录
 
 ```bash
-wget -O - https://cdn.jsdelivr.net/gh/cxjava/pingtunnel/install.sh | sh -s -- -b /usr/local/bin
+wget -O - https://cdn.jsdelivr.net/gh/cxjava/m3u8-downloader/install.sh | sh -s -- -b /usr/local/bin
 ```
 
 ## Ping命令使用方法

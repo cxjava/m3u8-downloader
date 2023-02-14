@@ -42,7 +42,7 @@ This [godownloader](https://github.com/kamilsk/godownloader) script will query G
 #### System-wide Install
 
 ```bash
-wget -O - https://cdn.jsdelivr.net/gh/cxjava/pingtunnel/install.sh | sh -s -- -b /usr/local/bin
+wget -O - https://raw.githubusercontent.com/cxjava/m3u8-downloader/main/install.sh | sh -s -- -b /usr/local/bin
 ```
 
 
