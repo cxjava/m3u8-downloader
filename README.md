@@ -32,6 +32,20 @@ m3u8 downloader by Golang
 - [ ] Show total file size
 - [ ] Delete error CDN IP
 
+
+## Installation
+
+###  Linux / macOS
+
+This [godownloader](https://github.com/kamilsk/godownloader) script will query GitHub for the latest release and download the correct binary for your platform into the directory set with the `-b` flag.
+
+#### System-wide Install
+
+```bash
+wget -O - https://cdn.jsdelivr.net/gh/cxjava/pingtunnel/install.sh | sh -s -- -b /usr/local/bin
+```
+
+
 ## Ping command
 
 ``` shell

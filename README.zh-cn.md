@@ -32,6 +32,16 @@ Golang版本的M3U8下载器
 - [ ] 显示总文件大小
 - [ ] 删除出错CDN IP
 
+## 安装
+
+###  Linux / macOS
+
+`-b`参数指定安装目录
+
+```bash
+wget -O - https://cdn.jsdelivr.net/gh/cxjava/pingtunnel/install.sh | sh -s -- -b /usr/local/bin
+```
+
 ## Ping命令使用方法
 
 ``` shell
