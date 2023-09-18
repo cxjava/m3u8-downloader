@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "GOLANG_VERSION=$(go version)" >> $GITHUB_ENV
           echo "BUILT_BY=$(whoami)@$(hostname)" >> $GITHUB_ENV
-      - uses: goreleaser/goreleaser-action@v4
+      - uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           version: latest
