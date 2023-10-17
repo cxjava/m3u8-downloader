@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/cheggaaa/pb/v3 v3.1.4
 	github.com/go-ping/ping v1.1.0
-	github.com/go-resty/resty/v2 v2.9.1
+	github.com/go-resty/resty/v2 v2.10.0
 	github.com/golang-module/carbon/v2 v2.2.11
 	github.com/grafov/m3u8 v0.12.0
 	github.com/sirupsen/logrus v1.9.3
