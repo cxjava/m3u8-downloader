@@ -32,15 +32,27 @@ Golang版本的M3U8下载器
 - [ ] 显示总文件大小
 - [ ] 删除出错CDN IP
 
-## 安装
+# 安装
 
-###  Linux / macOS
+## 用 [jpillora/installer](https://github.com/jpillora/installer) 安装
 
-`-b`参数指定安装目录
-
-```bash
-wget -O - https://cdn.jsdelivr.net/gh/cxjava/m3u8-downloader/install.sh | sh -s -- -b /usr/local/bin
+```sh
+# 默认安装到 /usr/local/bin
+curl https://i.jpillora.com/cxjava/m3u8-downloader! | bash
+# 或者
+curl https://gobin.fly.dev/cxjava/m3u8-downloader! | bash
 ```
+
+## 通过 [goblin.run](https://goblin.run) 安装
+
+```shell
+# 默认安装到 /usr/local/bin/
+curl -sSfL https://goblin.run/github.com/cxjava/m3u8-downloader | sh
+
+# 自定义路径为 /tmp
+curl -sSfL https://goblin.run/github.com/cxjava/m3u8-downloader | PREFIX=/tmp sh
+```
+
 
 ## Ping命令使用方法
 
