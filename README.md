@@ -33,17 +33,27 @@ m3u8 downloader by Golang
 - [ ] Delete error CDN IP
 
 
-## Installation
+# Installation
 
-###  Linux / macOS
+* install from [jpillora/installer](https://github.com/jpillora/installer)
 
-This [godownloader](https://github.com/kamilsk/godownloader) script will query GitHub for the latest release and download the correct binary for your platform into the directory set with the `-b` flag.
-
-#### System-wide Install
-
-```bash
-wget -O - https://raw.githubusercontent.com/cxjava/m3u8-downloader/main/install.sh | sh -s -- -b /usr/local/bin
+```sh
+#install to /usr/local/bin
+curl https://i.jpillora.com/cxjava/m3u8-downloader! | bash
+# or
+curl https://gobin.fly.dev/cxjava/m3u8-downloader! | bash
 ```
+
+## Via [goblin.run](https://goblin.run)
+
+```shell
+# binary will be /usr/local/bin/m3u8-downloader
+curl -sSfL https://goblin.run/github.com/cxjava/m3u8-downloader | sh
+
+# to put to a custom path
+curl -sSfL https://goblin.run/github.com/cxjava/m3u8-downloader | PREFIX=/tmp sh
+```
+
 
 
 ## Ping command
