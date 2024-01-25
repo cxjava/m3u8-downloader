@@ -3,7 +3,7 @@ module github.com/cxjava/m3u8-downloader
 go 1.21
 
 require (
-	github.com/cheggaaa/pb/v3 v3.1.4
+	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/go-ping/ping v1.1.0
 	github.com/go-resty/resty/v2 v2.11.0
 	github.com/golang-module/carbon/v2 v2.3.6
