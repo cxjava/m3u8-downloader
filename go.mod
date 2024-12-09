@@ -7,7 +7,7 @@ require (
 	github.com/go-ping/ping v1.2.0
 	github.com/go-resty/resty/v2 v2.16.2
 	github.com/golang-module/carbon/v2 v2.4.1
-	github.com/grafov/m3u8 v0.12.0
+	github.com/grafov/m3u8 v0.12.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
