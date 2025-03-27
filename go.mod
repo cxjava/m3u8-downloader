@@ -11,7 +11,7 @@ require (
 	github.com/grafov/m3u8 v0.12.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 )
 
 require (
