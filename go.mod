@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/go-ping/ping v1.2.0
-	github.com/go-resty/resty/v2 v2.17.0
+	github.com/go-resty/resty/v2 v2.17.1
 	github.com/golang-module/carbon/v2 v2.6.7
 	github.com/grafov/m3u8 v0.12.1
 	github.com/sirupsen/logrus v1.9.3
