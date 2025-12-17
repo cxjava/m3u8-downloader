@@ -7,8 +7,8 @@ toolchain go1.24.1
 require (
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/go-ping/ping v1.2.0
+	github.com/golang-module/carbon/v2 v2.6.9
 	github.com/go-resty/resty/v2 v2.17.1
-	github.com/golang-module/carbon/v2 v2.6.7
 	github.com/grafov/m3u8 v0.12.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.2
@@ -17,7 +17,7 @@ require (
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/dromara/carbon/v2 v2.6.7 // indirect
+	github.com/dromara/carbon/v2 v2.6.9 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
