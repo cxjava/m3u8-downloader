@@ -48,6 +48,7 @@ func PingAndPrint(pingRecords []PingRecord, outputType string) {
 	var total = int(len(pingRecords))
 	bar := pb.Full.Start(total)
 
+	var mu sync.Mutex
 	pingedRecords := []PingRecord{}
 	for _, pingRecord := range pingRecords {
 		wg.Add(1)
@@ -59,7 +60,14 @@ func PingAndPrint(pingRecords []PingRecord, outputType string) {
 				<-threadLimiter
 				log.Trace("Finished ping " + pingRecord.IPAddress)
 			}()
-			pingedRecords = append(pingedRecords, pingIP(pingRecord))
+			result, err := pingIP(pingRecord)
+			if err != nil {
+				log.Warn("Skip ping result for " + pingRecord.IPAddress + ": " + err.Error())
+				return
+			}
+			mu.Lock()
+			pingedRecords = append(pingedRecords, result)
+			mu.Unlock()
 		}(pingRecord)
 	}
 	wg.Wait()
@@ -76,22 +84,22 @@ func PingAndPrint(pingRecords []PingRecord, outputType string) {
 	}
 }
 
-func pingIP(pingRecord PingRecord) PingRecord {
+func pingIP(pingRecord PingRecord) (PingRecord, error) {
 	pinger, err := ping.NewPinger(pingRecord.IPAddress)
 	if err != nil {
 		log.Error("Ping IP Error: " + err.Error())
-		panic(err)
+		return pingRecord, err
 	}
 	pinger.Count = 2
 	pinger.Timeout = 2 * time.Second
 	err = pinger.Run() // blocks until finished
 	if err != nil {
 		log.Error("Ping Run Error: " + err.Error())
-		panic(err)
+		return pingRecord, err
 	}
 	stats := pinger.Statistics() // get send/receive/rtt stats
 	pingRecord.PingRTT = stats.AvgRtt
-	return pingRecord
+	return pingRecord, nil
 }
 
 func outputTime(pingRecords []PingRecord) {
