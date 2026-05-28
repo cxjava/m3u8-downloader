@@ -147,12 +147,11 @@ func (d *Downloader) renameFile(temp_file string) {
 	path2 := filepath.Join(d.downloadDir, d.output)
 	err := os.Rename(path1, path2)
 	if err != nil {
-		log.Println("[error] Rename failed: " + err.Error())
+		log.Error("Rename failed: " + err.Error())
 	}
 	if d.deleteTS {
-		err = os.RemoveAll(d.outputPath)
-		if err != nil {
-			log.Println(err)
+		if err := os.RemoveAll(d.outputPath); err != nil {
+			log.Error("RemoveAll failed: " + err.Error())
 		}
 	}
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cxjava/m3u8-downloader/downloader"
 	"github.com/golang-module/carbon/v2"
@@ -21,7 +20,6 @@ var (
 	threadNumber   int
 	headers        []string
 	cdns           []string
-	logLevel       string
 	key            string
 	keyFormat      string
 	useFFmpeg      bool
@@ -80,6 +78,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&keyFormat, "keyFormat", "", "original", "format of key, format can be those values: original, hex, base64.")
 	downloadCmd.Flags().BoolVarP(&useFFmpeg, "UseFFmpeg", "", false, "use FFmpeg for merging TS files.")
 	downloadCmd.Flags().BoolVarP(&insecure, "insecure", "", false, "skip TLS certificate verification (not recommended for production).")
+	downloadCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "Info", "logging level on a Logger,logging levels: Trace, Debug, Info, Warning, Error, Fatal and Panic.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -90,30 +89,4 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// downloadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-func initLog() {
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors: false,
-		FullTimestamp: true,
-	})
-	// log.SetFormatter(&log.JSONFormatter{})
-	switch strings.ToLower(logLevel) {
-	case "trace":
-		log.SetLevel(log.TraceLevel)
-	case "debug":
-		log.SetLevel(log.DebugLevel)
-	case "info":
-		log.SetLevel(log.InfoLevel)
-	case "warning":
-		log.SetLevel(log.WarnLevel)
-	case "error":
-		log.SetLevel(log.ErrorLevel)
-	case "fatal":
-		log.SetLevel(log.FatalLevel)
-	case "panic":
-		log.SetLevel(log.PanicLevel)
-	default:
-		log.SetLevel(log.InfoLevel)
-	}
 }
