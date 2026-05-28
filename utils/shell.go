@@ -1,117 +1,84 @@
 package utils
 
 import (
-	"bytes"
+	"io"
 	"os"
 	"os/exec"
-	"runtime"
+	"path/filepath"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func ExecUnixShell(s string) error {
-	cmd := exec.Command("/bin/bash", "-c", s)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Error("ExecUnixShell Error: " + err.Error())
-		return err
-	}
-	outStr := out.String()
-	if len(outStr) > 0 {
-		log.Info(outStr)
-	}
-	return nil
-}
+func concatFiles(dir string, output string, del bool) string {
+	files, err := filepath.Glob(filepath.Join(dir, "*.ts"))
+	check(err)
 
-func ExecWinShell(s string) error {
-	cmd := exec.Command("cmd", "/C", s)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Error("ExecWinShell Error: " + err.Error())
-		return err
+	outPath := filepath.Join(dir, output)
+	outFile, err := os.Create(outPath)
+	check(err)
+	defer func() {
+		check(outFile.Close())
+	}()
+
+	for _, file := range files {
+		inFile, err := os.Open(file)
+		check(err)
+		_, err = io.Copy(outFile, inFile)
+		closeErr := inFile.Close()
+		check(err)
+		check(closeErr)
+		if del {
+			check(os.Remove(file))
+		}
 	}
-	outStr := out.String()
-	if len(outStr) > 0 {
-		log.Info(outStr)
-	}
-	return nil
+
+	return output
 }
 
 //windows合并文件
 func WinMergeFile(path string, del bool) string {
-	err := os.Chdir(path)
-	check(err)
 	log.Info("Copy all ts files to merged.tmp")
-	err = ExecWinShell("copy /b *.ts merged.tmp")
-	check(err)
-	if del {
-		log.Warn("Delete all ts files")
-		err = ExecWinShell("del /Q *.ts")
-		check(err)
-	}
-	return "merged.tmp"
+	return concatFiles(path, "merged.tmp", del)
 }
 
 //unix合并文件
 func UnixMergeFile(path string, del bool) string {
-	err := os.Chdir(path)
-	check(err)
 	log.Info("Copy all ts files to merged.tmp")
-	cmd := `cat *.ts >> merged.tmp`
-	err = ExecUnixShell(cmd)
-	check(err)
-	if del {
-		log.Warn("Delete all ts files")
-		err = ExecUnixShell("rm -rf *.ts")
-		check(err)
-	}
-	return "merged.tmp"
+	return concatFiles(path, "merged.tmp", del)
 }
 
 func FFmpegMergeFile(path string, del bool) string {
-	err := os.Chdir(path)
+	if err := exec.Command("ffmpeg", "-L").Run(); err != nil {
+		log.Warn("Check ffmpeg failed, fallback to merge by copy")
+		return concatFiles(path, "merged.tmp", del)
+	}
+
+	files, err := filepath.Glob(filepath.Join(path, "*.ts"))
 	check(err)
 
-	// generate list file then invoke ffmpeg
-	// https://trac.ffmpeg.org/wiki/Concatenate
-	switch runtime.GOOS {
-	case "windows":
-		err = ExecWinShell("ffmpeg -L")
-		if err != nil {
-			// fallback to copy
-			log.Warn("Check ffmpeg failed, fallback to merge by copy")
-			return WinMergeFile(path, del)
-		}
+	var list strings.Builder
+	for _, file := range files {
+		list.WriteString("file '")
+		list.WriteString(filepath.Base(file))
+		list.WriteString("'\n")
+	}
 
-		err = ExecWinShell("(for %i in (*.ts) do @echo file '%i') > templist.txt")
-		check(err)
-		err = ExecWinShell("ffmpeg -f concat -i templist.txt -c copy merged.mp4")
-		check(err)
-		if del {
-			log.Warn("Delete templist and all ts files")
-			err = ExecWinShell("del /Q templist.txt && del /Q *.ts")
-			check(err)
-		}
-	default:
-		err = ExecUnixShell("ffmpeg -L")
-		if err != nil {
-			// fallback to copy
-			log.Warn("Check ffmpeg failed, fallback to merge by copy")
-			return UnixMergeFile(path, del)
-		}
+	listPath := filepath.Join(path, "templist.txt")
+	check(os.WriteFile(listPath, []byte(list.String()), 0644))
 
-		err = ExecUnixShell("for f in *.ts; do echo \"file '$f'\" >> templist.txt; done")
-		check(err)
-		err = ExecUnixShell("ffmpeg -f concat -i templist.txt -c copy merged.mp4")
-		check(err)
-		if del {
-			log.Warn("Delete templist and all ts files")
-			err = ExecUnixShell("rm -f templist.txt && rm -rf *.ts")
-			check(err)
+	cmd := exec.Command("ffmpeg", "-f", "concat", "-i", "templist.txt", "-c", "copy", "merged.mp4")
+	cmd.Dir = path
+	if err := cmd.Run(); err != nil {
+		log.Warn("Check ffmpeg failed, fallback to merge by copy")
+		check(os.Remove(listPath))
+		return concatFiles(path, "merged.tmp", del)
+	}
+
+	if del {
+		check(os.Remove(listPath))
+		for _, file := range files {
+			check(os.Remove(file))
 		}
 	}
 	return "merged.mp4"
