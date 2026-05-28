@@ -21,7 +21,9 @@ func FilenameWithoutExtension(fn string) string {
 }
 
 func RemoveAllDir(dirs string) {
-	os.RemoveAll(strings.Split(dirs, "/")[0])
+	if err := os.RemoveAll(dirs); err != nil {
+		log.Warn("RemoveAllDir failed: " + err.Error())
+	}
 }
 
 func IsExist(filePath string) bool {

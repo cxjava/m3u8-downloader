@@ -25,6 +25,7 @@ var (
 	key            string
 	keyFormat      string
 	useFFmpeg      bool
+	insecure       bool
 )
 
 // downloadCmd represents the download command
@@ -55,6 +56,7 @@ var downloadCmd = &cobra.Command{
 			Key:            key,
 			KeyFormat:      keyFormat,
 			UseFFmpeg:      useFFmpeg,
+			Insecure:       insecure,
 		}
 		downloader.SetOptions(options)
 		downloader.Download()
@@ -77,6 +79,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&key, "key", "", "", "custom key to decrypt ts data.")
 	downloadCmd.Flags().StringVarP(&keyFormat, "keyFormat", "", "original", "format of key, format can be those values: original, hex, base64.")
 	downloadCmd.Flags().BoolVarP(&useFFmpeg, "UseFFmpeg", "", false, "use FFmpeg for merging TS files.")
+	downloadCmd.Flags().BoolVarP(&insecure, "insecure", "", false, "skip TLS certificate verification (not recommended for production).")
 
 	// Here you will define your flags and configuration settings.
 

@@ -62,7 +62,7 @@ func initHttpClient(proxy string, headers []string) {
 		TLSHandshakeTimeout:   5 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 		MaxIdleConnsPerHost:   runtime.GOMAXPROCS(0) + 1,
-		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: insecure},
 	}
 	client.SetTransport(transport)
 

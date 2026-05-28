@@ -41,6 +41,7 @@ var (
 	keyStr         string
 	keyFormat      string
 	useFFmpeg      bool
+	insecure       bool
 )
 
 // Options defines common m3u8 options.
@@ -58,6 +59,7 @@ type Options struct {
 	Key            string
 	KeyFormat      string
 	UseFFmpeg      bool
+	Insecure       bool
 }
 
 // SetOptions sets the common request option.
@@ -75,6 +77,7 @@ func SetOptions(opt Options) {
 	keyStr = opt.Key
 	keyFormat = opt.KeyFormat
 	useFFmpeg = opt.UseFFmpeg
+	insecure = opt.Insecure
 }
 
 func ResolveDir(dirStr string) string {
@@ -274,6 +277,7 @@ func downloadM3u8(mpl *m3u8.MediaPlaylist) {
 			data, err := download(segment.URI)
 			if err != nil {
 				log.Error("Download : " + segment.URI + " failed: " + err.Error())
+				return
 			}
 
 			var originalData []byte
