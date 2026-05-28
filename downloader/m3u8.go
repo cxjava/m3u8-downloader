@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -95,7 +96,8 @@ func ResolveDir(dirStr string) string {
 }
 
 func Download() {
-	initCDN(cdns)
+	initCDN(context.Background(), cdns)
+	defer StopCDN()
 	initHttpClient(proxy, headers)
 	checkOutputFolder()
 	var data []byte

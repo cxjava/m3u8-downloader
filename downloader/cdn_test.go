@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
@@ -64,7 +65,9 @@ func Test_addCDN(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := addCDN(tt.args.cdnmap)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			got := addCDN(ctx, tt.args.cdnmap)
 			for i := 0; i < 10; i++ {
 				if v, ok := got["www.baidu.com"]; ok {
 					fmt.Println(<-v)

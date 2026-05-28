@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -8,14 +9,23 @@ import (
 
 var cdnChan = make(map[string]chan string, 2)
 
+var cdnCancel context.CancelFunc
+
 type CDNS struct {
 	Domain string
 	IPs    []string
 }
 
-func initCDN(cdns []string) {
+func initCDN(ctx context.Context, cdns []string) {
 	cdnList := parseCDN(cdns)
-	cdnChan = addCDN(cdnList)
+	cdnChan = addCDN(ctx, cdnList)
+}
+
+// StopCDN cancels the CDN goroutines, allowing them to exit cleanly.
+func StopCDN() {
+	if cdnCancel != nil {
+		cdnCancel()
+	}
 }
 
 func parseCDN(cdns []string) map[string]CDNS {
@@ -41,18 +51,23 @@ func parseCDN(cdns []string) map[string]CDNS {
 	return fastestCDN
 }
 
-func addCDN(cmap map[string]CDNS) map[string]chan string {
+func addCDN(ctx context.Context, cmap map[string]CDNS) map[string]chan string {
 	log.Trace("Add CDN")
 	cdnMap := make(map[string]chan string, len(cmap))
 	for _, cdn := range cmap {
 		ipChan := make(chan string, 10)
-		go func(ipChan chan string, ips []string) {
+		go func(ctx context.Context, ipChan chan string, ips []string) {
 			for {
 				for _, v := range ips {
-					ipChan <- v
+					select {
+					case ipChan <- v:
+					case <-ctx.Done():
+						log.Trace("CDN goroutine stopped for domain")
+						return
+					}
 				}
 			}
-		}(ipChan, cdn.IPs)
+		}(ctx, ipChan, cdn.IPs)
 		cdnMap[cdn.Domain] = ipChan
 	}
 	return cdnMap
