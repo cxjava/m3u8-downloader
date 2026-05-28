@@ -248,11 +248,10 @@ func (d *Downloader) parseM3u8(data []byte, downloadUrl string) (*m3u8.MediaPlay
 }
 
 func (d *Downloader) downloadM3u8(mpl *m3u8.MediaPlaylist) {
-
 	var wg sync.WaitGroup
 	threadLimiter := make(chan struct{}, d.threadNumber)
 
-	var total = int(mpl.Count())
+	total := int(mpl.Count())
 	bar := pb.ProgressBarTemplate(tmpl).Start64(int64(total))
 
 	for i := 0; i < total; i++ {
@@ -264,103 +263,122 @@ func (d *Downloader) downloadM3u8(mpl *m3u8.MediaPlaylist) {
 				wg.Done()
 				<-threadLimiter
 			}()
-			curr_path := fmt.Sprintf("%s/%05d.ts", d.outputPath, index)
-			if utils.IsExist(curr_path) {
-				log.Warn("File: " + curr_path + " already exist")
-				return
-			}
-			var keyURL, ivStr string
-			if segment.Key != nil && segment.Key.URI != "" {
-				keyURL = segment.Key.URI
-				ivStr = segment.Key.IV
-			} else if globalKey != nil && globalKey.URI != "" {
-				keyURL = globalKey.URI
-				ivStr = globalKey.IV
-			}
-
-			data, err := d.download(segment.URI)
-			if err != nil {
-				log.Error("Download : " + segment.URI + " failed: " + err.Error())
-				return
-			}
-
-			var originalData []byte
-
-			if len(d.keyStr) > 0 {
-				log.Info("Try to decrypt data by custom key " + d.keyStr)
-				var key, iv []byte
-				if ivStr != "" {
-					iv, err = hex.DecodeString(strings.TrimPrefix(ivStr, "0x"))
-					if err != nil {
-						log.Error("Decode iv failed:" + err.Error())
-					}
-				} else {
-					iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, byte(index)}
-				}
-				switch strings.ToLower(d.keyFormat) {
-				case "original":
-					key = []byte(d.keyStr)
-				case "hex":
-					key = utils.HexDecode(d.keyStr)
-				case "base64":
-					var err error
-					key, err = base64.StdEncoding.DecodeString(d.keyStr)
-					if err != nil {
-						log.Errorf("base64 Decode %s Failed: %s.", d.keyStr, err.Error())
-					}
-				default:
-					key = []byte(d.keyStr)
-				}
-
-				originalData, err = decrypter.Decrypt(data, key, iv)
-				if err != nil {
-					log.Errorf("Decrypt failed by own key %s : %s", d.keyStr, err.Error())
-				}
-			} else if keyURL == "" {
-				originalData = data
-			} else {
-				log.Info("Try to decrypt data")
-				var key, iv []byte
-				key, err = d.download(keyURL)
-				if err != nil {
-					log.Error("Download : " + keyURL + " failed: " + err.Error())
-				}
-
-				if ivStr != "" {
-					iv, err = hex.DecodeString(strings.TrimPrefix(ivStr, "0x"))
-					if err != nil {
-						log.Error("Decode iv failed:" + err.Error())
-					}
-				} else {
-					iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, byte(index)}
-				}
-				originalData, err = decrypter.Decrypt(data, key, iv)
-				if err != nil {
-					log.Error("Decrypt failed:" + err.Error())
-				}
-			}
-
-			if d.deleteSyncByte {
-				log.Info("Delete sync byte.")
-				dataLength := len(originalData)
-				for j := 0; j < dataLength; j++ {
-					if originalData[j] == syncByte {
-						log.Warn("Find sync byte, and delete it.")
-						originalData = originalData[j:]
-						break
-					}
-				}
-			}
-
-			err = os.WriteFile(curr_path, originalData, 0666)
-			if err != nil {
-				log.Error("WriteFile failed:" + err.Error())
-			}
-			log.Trace("Save file '" + curr_path + "' successfully!")
+			d.downloadSegment(index, segment, globalKey)
 		}(i, mpl.Segments[i], mpl.Key)
 	}
 	wg.Wait()
 	bar.Finish()
+}
+
+func (d *Downloader) downloadSegment(index int, segment *m3u8.MediaSegment, globalKey *m3u8.Key) {
+	currPath := fmt.Sprintf("%s/%05d.ts", d.outputPath, index)
+	if utils.IsExist(currPath) {
+		log.Warn("File: " + currPath + " already exist")
+		return
+	}
+
+	keyURL, ivStr := resolveKeyURL(segment, globalKey)
+
+	data, err := d.download(segment.URI)
+	if err != nil {
+		log.Error("Download : " + segment.URI + " failed: " + err.Error())
+		return
+	}
+
+	originalData, err := d.decryptSegmentData(data, keyURL, ivStr, index)
+	if err != nil {
+		log.Error("Decrypt failed for segment " + segment.URI + ": " + err.Error())
+		return
+	}
+
+	originalData = removeSyncBytes(originalData, d.deleteSyncByte)
+
+	if err := os.WriteFile(currPath, originalData, 0666); err != nil {
+		log.Error("WriteFile failed:" + err.Error())
+	}
+}
+
+func resolveKeyURL(segment *m3u8.MediaSegment, globalKey *m3u8.Key) (keyURL, ivStr string) {
+	if segment.Key != nil && segment.Key.URI != "" {
+		return segment.Key.URI, segment.Key.IV
+	}
+	if globalKey != nil && globalKey.URI != "" {
+		return globalKey.URI, globalKey.IV
+	}
+	return "", ""
+}
+
+func (d *Downloader) decryptSegmentData(data []byte, keyURL, ivStr string, index int) ([]byte, error) {
+	if len(d.keyStr) > 0 {
+		return d.decryptWithCustomKey(data, ivStr, index)
+	}
+	if keyURL == "" {
+		return data, nil
+	}
+	return d.decryptWithKeyURL(data, keyURL, ivStr, index)
+}
+
+func (d *Downloader) decryptWithCustomKey(data []byte, ivStr string, index int) ([]byte, error) {
+	log.Info("Try to decrypt data by custom key " + d.keyStr)
+	key := d.parseKey()
+	iv := d.parseIV(ivStr, index)
+	return decrypter.Decrypt(data, key, iv)
+}
+
+func (d *Downloader) decryptWithKeyURL(data []byte, keyURL, ivStr string, index int) ([]byte, error) {
+	log.Info("Try to decrypt data")
+	key, err := d.download(keyURL)
+	if err != nil {
+		return nil, fmt.Errorf("download key %s failed: %w", keyURL, err)
+	}
+	iv := d.parseIV(ivStr, index)
+	return decrypter.Decrypt(data, key, iv)
+}
+
+func (d *Downloader) parseKey() []byte {
+	switch strings.ToLower(d.keyFormat) {
+	case "hex":
+		return utils.HexDecode(d.keyStr)
+	case "base64":
+		key, err := base64.StdEncoding.DecodeString(d.keyStr)
+		if err != nil {
+			log.Errorf("base64 Decode %s Failed: %s.", d.keyStr, err.Error())
+			return []byte(d.keyStr)
+		}
+		return key
+	default:
+		return []byte(d.keyStr)
+	}
+}
+
+func (d *Downloader) parseIV(ivStr string, index int) []byte {
+	if ivStr != "" {
+		iv, err := hex.DecodeString(strings.TrimPrefix(ivStr, "0x"))
+		if err != nil {
+			log.Error("Decode iv failed:" + err.Error())
+			return make([]byte, 16)
+		}
+		return iv
+	}
+	iv := make([]byte, 16)
+	iv[15] = byte(index)
+	return iv
+}
+
+func removeSyncBytes(data []byte, enabled bool) []byte {
+	if !enabled {
+		return data
+	}
+	log.Info("Delete sync byte.")
+	for i := 0; i < len(data); i++ {
+		if data[i] == syncByte {
+			if i > 0 {
+				log.Warn("Find sync byte, and delete it.")
+			}
+			return data[i:]
+		}
+	}
+	return data
 }
 
 func formatURI(base *url.URL, u string) (string, error) {
