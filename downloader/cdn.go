@@ -7,24 +7,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var cdnChan = make(map[string]chan string, 2)
-
-var cdnCancel context.CancelFunc
-
 type CDNS struct {
 	Domain string
 	IPs    []string
 }
 
-func initCDN(ctx context.Context, cdns []string) {
-	cdnList := parseCDN(cdns)
-	cdnChan = addCDN(ctx, cdnList)
+func (d *Downloader) initCDN() {
+	cdnList := parseCDN(d.cdns)
+	ctx, cancel := context.WithCancel(context.Background())
+	d.cdnCancel = cancel
+	d.cdnChan = addCDN(ctx, cdnList)
 }
 
-// StopCDN cancels the CDN goroutines, allowing them to exit cleanly.
-func StopCDN() {
-	if cdnCancel != nil {
-		cdnCancel()
+func (d *Downloader) StopCDN() {
+	if d.cdnCancel != nil {
+		d.cdnCancel()
 	}
 }
 

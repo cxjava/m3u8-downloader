@@ -58,8 +58,8 @@ var downloadCmd = &cobra.Command{
 			UseFFmpeg:      useFFmpeg,
 			Insecure:       insecure,
 		}
-		downloader.SetOptions(options)
-		downloader.Download()
+		d := downloader.NewDownloader(options)
+		d.Download()
 	},
 }
 

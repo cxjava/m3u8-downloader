@@ -14,39 +14,39 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	client         = resty.New()
-	defaultHeaders = map[string]string{
-		"dnt":             "1",
-		"Accept":          "*/*",
-		"Accept-Charset":  "UTF-8,*;q=0.5",
-		"Accept-Encoding": "gzip,deflate,sdch",
-		"Accept-Language": "en-US,en;q=0.8",
-		"User-Agent":      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36 Edg/91.0.864.54",
-	}
-)
-
-func download(url string) ([]byte, error) {
-	log.Trace("Start download " + url)
-	resp, err := client.R().Get(url)
-	log.Trace("Finish download " + url)
-	log.Tracef("Error      :%+v", err)
-	log.Trace("Status     :" + resp.Status())
-	return resp.Body(), err
+var defaultHeaders = map[string]string{
+	"dnt":             "1",
+	"Accept":          "*/*",
+	"Accept-Charset":  "UTF-8,*;q=0.5",
+	"Accept-Encoding": "gzip,deflate,sdch",
+	"Accept-Language": "en-US,en;q=0.8",
+	"User-Agent":      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36 Edg/91.0.864.54",
 }
 
-func initHttpClient(proxy string, headers []string) {
+func (d *Downloader) download(url string) ([]byte, error) {
+	log.Trace("Start download " + url)
+	resp, err := d.client.R().Get(url)
+	log.Trace("Finish download " + url)
+	log.Tracef("Error      :%+v", err)
+	if resp != nil {
+		log.Trace("Status     :" + resp.Status())
+		return resp.Body(), err
+	}
+	return nil, err
+}
+
+func (d *Downloader) initHttpClient() {
 	log.Trace("Init http client")
+	d.client = resty.New()
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}
 	transport := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// addr is "google.com:443"
 			domainAndPort := strings.Split(addr, ":")
 			domain := domainAndPort[0]
-			if ipch, ok := cdnChan[domain]; ok {
+			if ipch, ok := d.cdnChan[domain]; ok {
 				ip := <-ipch
 				port := domainAndPort[1]
 				addr = fmt.Sprintf("%s:%s", ip, port)
@@ -56,40 +56,40 @@ func initHttpClient(proxy string, headers []string) {
 		},
 		Proxy:                 http.ProxyFromEnvironment,
 		ForceAttemptHTTP2:     true,
-		DisableKeepAlives:     true, // for CDN
+		DisableKeepAlives:     true,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       5 * time.Second,
 		TLSHandshakeTimeout:   5 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 		MaxIdleConnsPerHost:   runtime.GOMAXPROCS(0) + 1,
-		TLSClientConfig:       &tls.Config{InsecureSkipVerify: insecure},
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: d.insecure},
 	}
-	client.SetTransport(transport)
+	d.client.SetTransport(transport)
 
-	client.SetTimeout(5 * time.Second)
+	d.client.SetTimeout(5 * time.Second)
 
-	if len(proxy) > 0 {
-		log.Info("Use proxy : ", proxy)
-		client.SetProxy(proxy)
+	if len(d.proxy) > 0 {
+		log.Info("Use proxy : ", d.proxy)
+		d.client.SetProxy(d.proxy)
 	}
 
-	if len(headers) > 0 {
+	if len(d.headers) > 0 {
 		log.Info("Set customization header")
-		for _, header := range headers {
+		for _, header := range d.headers {
 			h := strings.SplitN(header, ":", 2)
 			log.Debug("customization header =>" + h[0] + ":" + h[1])
-			client.SetHeader(h[0], strings.TrimSpace(h[1]))
+			d.client.SetHeader(h[0], strings.TrimSpace(h[1]))
 		}
 	} else {
 		log.Debug("Use default header")
 		log.Tracef("Use default header :%+v", defaultHeaders)
-		client.SetHeaders(defaultHeaders)
+		d.client.SetHeaders(defaultHeaders)
 	}
-	client.
+	d.client.
 		SetRetryCount(5).
 		SetRetryWaitTime(5 * time.Second).
 		SetRetryMaxWaitTime(20 * time.Second)
 
-	client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(10))
+	d.client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(10))
 
 }
