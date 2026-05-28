@@ -57,7 +57,7 @@ func TestRemoveAllDir(t *testing.T) {
 		})
 	}
 	// cleanup all test dirs
-	os.RemoveAll("test")
+	_ = os.RemoveAll("test")
 	pwd, _ := os.Getwd()
 	fmt.Println(filepath.Join(pwd + "/./abc"))
 	fmt.Println(filepath.Join(pwd + "/../../def"))

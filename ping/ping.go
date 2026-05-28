@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
-	"github.com/go-ping/ping"
+	"github.com/prometheus-community/pro-bing"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -77,15 +77,16 @@ func PingAndPrint(pingRecords []PingRecord, outputType string) {
 		return pingedRecords[i].PingRTT < pingedRecords[j].PingRTT
 	})
 
-	if outputType == "t" {
+	switch outputType {
+	case "t":
 		outputTime(pingedRecords)
-	} else if outputType == "p" {
+	case "p":
 		outputParameter(pingedRecords)
 	}
 }
 
 func pingIP(pingRecord PingRecord) (PingRecord, error) {
-	pinger, err := ping.NewPinger(pingRecord.IPAddress)
+	pinger, err := 	probing.NewPinger(pingRecord.IPAddress)
 	if err != nil {
 		log.Error("Ping IP Error: " + err.Error())
 		return pingRecord, err
